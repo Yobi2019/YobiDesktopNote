@@ -1,4 +1,4 @@
-from tkinter import Tk, Label, Scale, X, Menu, HORIZONTAL, BOTTOM, TOP, filedialog, messagebox, IntVar
+from tkinter import Tk, Label, Scale, X, Menu, HORIZONTAL, BOTTOM, TOP, filedialog, messagebox, IntVar, WORD
 from tkinter.scrolledtext import ScrolledText
 import json
 import os
@@ -79,8 +79,10 @@ class YobiDesktopNote:
         self.func_label.bind("<B1-Motion>", self.move)
         self.func_label.bind("<ButtonRelease-1>", self.move_end)
         # 笔记编辑区域
-        self.notes_area = ScrolledText(self.root)
+        self.notes_area = ScrolledText(self.root, autoseparators=False, undo=True, wrap=WORD)
         self.notes_area.pack(fill=X, expand=True, side=TOP)
+        # 绑定键盘事件，插入分隔符
+        self.notes_area.bind('<Key>', self.notes_area_add_separator)
         # 窗体透明度条
         self.win_transparent_scale = Scale(self.root, from_=100.0, to=20.0, resolution=1,
                                            sliderlength=20, orient=HORIZONTAL, command=self.set_win_alpha)
@@ -90,6 +92,9 @@ class YobiDesktopNote:
         self.win_set_color()
         self.load_tmp_file()
         self.root.mainloop()
+
+    def notes_area_add_separator(self, event):
+        self.notes_area.edit_separator()
 
     def load_tmp_file(self):
         if not auto_load_tmp_file_cfg:
@@ -105,6 +110,7 @@ class YobiDesktopNote:
             return
 
         self.notes_area.insert('end', tmp_file_content)
+        self.notes_area.edit_separator()
 
     def win_set_color(self):
         self.func_label.configure(bg=self.main_color)
