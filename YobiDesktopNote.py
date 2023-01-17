@@ -69,8 +69,12 @@ class YobiDesktopNote:
         self.right_menu_auto_load_tmp_var.set(1 if auto_load_tmp_file_cfg else 0)
         self.right_menu.add_checkbutton(label='启动时自动加载上一次编辑的笔记', onvalue=1, offvalue=0,
                                         variable=self.right_menu_auto_load_tmp_var)
+        self.right_menu_topmost_var = IntVar()
+        self.right_menu_topmost_var.set(1 if self.win_topmost else 0)
+        self.right_menu.add_checkbutton(label='置顶', onvalue=1, offvalue=0,
+                                        variable=self.right_menu_topmost_var, command=self.win_set_topmost)
+        # self.right_menu.add_command(label='置顶/取消置顶', command=self.win_set_topmost)
         self.right_menu.add_command(label='保存笔记为文本文件', command=self.save_note_text)
-        self.right_menu.add_command(label='置顶/取消置顶', command=self.win_set_topmost)
         self.right_menu.add_command(label="关闭", command=self.on_close)
         # self.right_menu.add_command(label='最小化', command=self.win_iconify)
         self.func_label.bind("<Button-3>", self.popup)
