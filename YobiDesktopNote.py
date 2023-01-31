@@ -87,11 +87,16 @@ class YobiDesktopNote:
         self.notes_area.pack(fill=X, expand=True, side=TOP)
         # 绑定键盘事件，插入分隔符
         self.notes_area.bind('<Key>', self.notes_area_add_separator)
+        self.notes_area.bind('<Control-s>', self.save_tmp_file)
         # 窗体透明度条
         self.win_transparent_scale = Scale(self.root, from_=100.0, to=20.0, resolution=1,
                                            sliderlength=20, orient=HORIZONTAL, command=self.set_win_alpha)
+        self.set_win_alpha(self.win_alpha_cfg)
         self.win_transparent_scale.set(self.win_alpha_cfg)
         self.win_transparent_scale.pack(fill=X, side=BOTTOM)
+        # 通过键盘控制透明度
+        self.root.bind('<Alt-Right>', lambda event: self.win_transparent_modify(event, -1))
+        self.root.bind('<Alt-Left>', lambda event: self.win_transparent_modify(event, 1))
 
         self.win_set_color()
         self.load_tmp_file()
@@ -122,6 +127,14 @@ class YobiDesktopNote:
         self.win_transparent_scale.configure(bg=self.main_color)
         self.notes_area.configure(bg=self.notes_bg_color)
 
+    def save_tmp_file(self, event=None):
+        # 保存笔记内容到临时文件
+        note_content = self.notes_area.get('1.0', 'end-1c')
+        if note_content.strip():
+            with open(tmp_file_path, 'w', encoding='utf-8') as tmp_fp:
+                tmp_fp.write(note_content)
+                tmp_fp.flush()
+
     def on_close(self):
         # 保存用户配置
         with open(user_cfg_fp, 'r+') as fp:
@@ -134,12 +147,7 @@ class YobiDesktopNote:
             fp.truncate()
             fp.write(json.dumps(data))
 
-        # 保存笔记内容到临时文件
-        note_content = self.notes_area.get('1.0', 'end-1c')
-        if note_content.strip():
-            with open(tmp_file_path, 'w', encoding='utf-8') as tmp_fp:
-                tmp_fp.write(note_content)
-
+        self.save_tmp_file()
         self.root.quit()
         self.root.destroy()
 
@@ -194,6 +202,11 @@ class YobiDesktopNote:
 
     def set_win_alpha(self, value):
         self.root.attributes("-alpha", int(value) / 100)
+
+    def win_transparent_modify(self, event, offset):
+        self.win_transparent_scale.focus()
+        val = int(self.win_transparent_scale.get())
+        self.win_transparent_scale.set(val + offset)
 
 
 if __name__ == '__main__':
